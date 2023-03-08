@@ -1,4 +1,5 @@
 import express from 'express';
+import { redirectUri } from './env';
 import api from './spotify';
 
 const scopes = ['playlist-read-private', 'playlist-read-collaborative'];
@@ -7,14 +8,15 @@ const app = express();
 
 app.get('/', (req, res) => {
     try {
-        res.redirect(api.createAuthorizeURL(scopes, process.env.SPOTIFY_REDIRECT_URI || ''));
+        res.redirect(api.createAuthorizeURL(scopes, redirectUri));
     } catch (err) {
         console.error(err);
         res.json({ err });
     }
 });
 
-app.get(process.env.SPOTIFY_REDIRECT_URI || '', async (req, res) => {
+// Should just be the redirecet URI without the host
+app.get(`/${redirectUri.split('/').slice(3).join('/')}`, async (req, res) => {
     try {
         const { code } = req.query;
 
@@ -35,5 +37,6 @@ app.get(process.env.SPOTIFY_REDIRECT_URI || '', async (req, res) => {
 });
 
 app.listen(3000, async () => {
+    console.log();
     console.log('Login server listening');
 });
